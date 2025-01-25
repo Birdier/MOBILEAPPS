@@ -1,0 +1,205 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+
+const ShoppingList = () => {
+  const [categories, setCategories] = useState({ Hrana: [], Čistila: [] });
+  const [colorScheme, setColorScheme] = useState("blue");
+  const [showColorOptions, setShowColorOptions] = useState(false);
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Hrana");
+  const [expandedCategories, setExpandedCategories] = useState({ Hrana: true, Čistila: true });
+
+  const addItem = (item, category) => {
+    if (item.trim() && category) {
+      setCategories((prev) => ({
+        ...prev,
+        [category]: [...(prev[category] || []), { name: item, completed: false }],
+      }));
+    }
+  };
+
+  const addCategory = (category) => {
+    if (category.trim() && !categories[category]) {
+      setCategories((prev) => ({ ...prev, [category]: [] }));
+      setExpandedCategories((prev) => ({ ...prev, [category]: true }));
+    }
+  };
+
+  const toggleItem = (itemToToggle, category) => {
+    setCategories((prev) => {
+      const newCategories = { ...prev };
+      newCategories[category] = newCategories[category].map((item) =>
+        item.name === itemToToggle.name
+          ? { ...item, completed: !item.completed }
+          : item
+      );
+      return newCategories;
+    });
+  };
+
+  const removeItem = (itemToRemove, category) => {
+    setCategories((prev) => {
+      const newCategories = { ...prev };
+      newCategories[category] = newCategories[category].filter(
+        (item) => item.name !== itemToRemove.name
+      );
+      return newCategories;
+    });
+  };
+
+  const toggleCategoryExpand = (category) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
+  const colorClasses = {
+    blue: "bg-blue-100 border-blue-400",
+    green: "bg-green-100 border-green-400",
+    purple: "bg-purple-100 border-purple-400",
+    red: "bg-red-100 border-red-400",
+    yellow: "bg-yellow-100 border-yellow-400",
+    teal: "bg-teal-100 border-teal-400",
+    darkBlue: "bg-blue-600 border-blue-500 text-white",
+  };
+
+  return (
+    <div
+      className={`p-6 max-w-md mx-auto space-y-6 rounded-lg shadow-lg ${colorClasses[colorScheme]}`}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold text-gray-800">Nakupovalni seznam</h1>
+        <div className="relative">
+          <button
+            onClick={() => setShowColorOptions(!showColorOptions)}
+            className={`w-6 h-6 rounded-full border-2 ${
+              colorScheme === "blue"
+                ? "bg-blue-400"
+                : colorScheme === "green"
+                ? "bg-green-400"
+                : colorScheme === "purple"
+                ? "bg-purple-400"
+                : colorScheme === "red"
+                ? "bg-red-400"
+                : colorScheme === "yellow"
+                ? "bg-yellow-400"
+                : colorScheme === "teal"
+                ? "bg-teal-400"
+                : "bg-blue-600"
+            } shadow focus:ring-2 focus:ring-offset-2 focus:ring-${colorScheme}-500`}
+          ></button>
+          {showColorOptions && (
+            <div className="absolute top-8 right-0 bg-white border rounded shadow-lg p-3 z-10">
+              <label className="font-semibold block mb-2 text-gray-700">
+                Barvna shema:
+              </label>
+              <select
+                value={colorScheme}
+                onChange={(e) => setColorScheme(e.target.value)}
+                className="border p-2 rounded w-full text-gray-700"
+              >
+                <option value="blue">Modra</option>
+                <option value="green">Zelena</option>
+                <option value="purple">Vijolična</option>
+                <option value="red">Rdeča</option>
+                <option value="yellow">Rumena</option>
+                <option value="teal">Turkizna</option>
+                <option value="darkBlue">Temno modra</option>
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Card className="border rounded-lg shadow bg-white">
+        <CardContent>
+          {Object.keys(categories).map((category) => (
+            <div key={category} className="mb-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                  {category}
+                </h2>
+                <button
+                  onClick={() => toggleCategoryExpand(category)}
+                  className="text-sm text-blue-500 flex items-center"
+                >
+                  <span className="mr-1">
+                    {expandedCategories[category] ? "Skrči" : "Razširi"}
+                  </span>
+                  <span>{expandedCategories[category] ? "▼" : "▶"}</span>
+                </button>
+              </div>
+              {expandedCategories[category] && (
+                <div className="flex flex-wrap gap-2">
+                  {categories[category].map((item) => (
+                    <div
+                      key={item.name}
+                      className={`px-4 py-1 text-base rounded-md font-bold cursor-pointer shadow-lg border border-gray-500 ${
+                        item.completed
+                          ? "bg-gray-300 text-gray-500 line-through"
+                          : "text-white"
+                      }`}
+                      style={{
+                        backgroundColor: item.completed ? "#d3d3d3" : "#27408B",
+                      }}
+                      onClick={() => toggleItem(item, category)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setTimeout(() => removeItem(item, category), 2000);
+                      }}
+                    >
+                      {item.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <div className="flex flex-col gap-3 mt-6 items-center">
+            <input
+              type="text"
+              placeholder="Dodaj izdelek"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && selectedCategory) {
+                  addItem(e.target.value, selectedCategory);
+                  e.target.value = "";
+                }
+              }}
+              className="w-3/4 border p-3 rounded shadow-sm focus:ring-2 focus:ring-blue-300 text-lg"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-3/4 border p-3 rounded shadow-sm focus:ring-2 focus:ring-blue-300 text-lg"
+            >
+              {Object.keys(categories).map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            <Button
+              onClick={(e) => {
+                const input = e.target.previousSibling.previousSibling;
+                addItem(input.value, selectedCategory);
+                input.value = "";
+              }}
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg text-lg"
+            >
+              Dodaj
+            </Button>
+          </div>
+          <div className="flex items-center justify-end mt-6">
+            <button
+              className="bg-blue-500 text-white rounded-full p-2 shadow hover:bg-blue-600"
+              onClick={() => setShowCategoryInput(!showCategoryInput)}
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+         
