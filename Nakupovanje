@@ -130,15 +130,15 @@ const ShoppingList = () => {
                   <span className="mr-1">
                     {expandedCategories[category] ? "Skrči" : "Razširi"}
                   </span>
-                  <span>{expandedCategories[category] ? "▼" : "▶"}</span>
+                  <span>{expandedCategories[category] ? "▶" : "▼"}</span>
                 </button>
               </div>
               {expandedCategories[category] && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {categories[category].map((item) => (
                     <div
                       key={item.name}
-                      className={`px-4 py-1 text-base rounded-md font-bold cursor-pointer shadow-lg border border-gray-500 ${
+                      className={`px-5 py-2 text-xl rounded-md font-bold cursor-pointer shadow-lg border border-gray-500 ${
                         item.completed
                           ? "bg-gray-300 text-gray-500 line-through"
                           : "text-white"
@@ -202,4 +202,30 @@ const ShoppingList = () => {
               <Plus size={20} />
             </button>
           </div>
-         
+          {showCategoryInput && (
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Ime nove kategorije"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="w-full border p-3 rounded shadow-sm focus:ring-2 focus:ring-blue-300 text-lg"
+              />
+              <Button
+                onClick={() => {
+                  addCategory(newCategory);
+                  setNewCategory("");
+                }}
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg mt-3"
+              >
+                Dodaj kategorijo
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ShoppingList;
